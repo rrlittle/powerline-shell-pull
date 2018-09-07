@@ -13,10 +13,12 @@ class Segment(BasicSegment):
         return wrappers.get(shell, default) % content
 
     def build_title(self, title):
-        if type(title) is str:
+        if type(title) in (str, unicode):
             return title
         elif type(title) is list:
-            warn('not implemented yet')
+            err = 'not implemented yet'
+            warn(err)
+            return err
         else:
             return 'powerline-shell set_term_title title invalid'
 
@@ -26,10 +28,11 @@ class Segment(BasicSegment):
         if not (('xterm' in term) or ('rxvt' in term)):
             return
         cust_title = powerline.segment_conf('set_term_title', 'title')
-        content = '%s@%s: %s' % (
-            os.getenv('USER'),
-            socket.gethostname().split('.')[0],
-            powerline.cwd) if cust_title else self.build_title(cust_title)
-
+        content = (self.build_title(cust_title) if cust_title else
+                   '%s@%s: %s' % (os.getenv('USER'),
+                                  socket.gethostname().split('.')[0],
+                                  powerline.cwd.replace(
+                                      os.path.expanduser('~'), '~')
+                                  ))
         set_title = self.format(powerline.args.shell, content)
         powerline.append(set_title, None, None, None)

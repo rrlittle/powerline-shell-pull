@@ -240,6 +240,5 @@ def main():
         segments.append(segment)
     for segment in segments:
         segment.add_to_powerline()
-    print(powerline.segments)
     sys.stdout.write(powerline.draw())
     return 0
