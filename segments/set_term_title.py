@@ -26,7 +26,7 @@ class Segment(BasicSegment):
         theme_mod = importer.import_(
             'powerline_shell.themes.', 'default', 'Theme')
         theme = getattr(theme_mod, 'Color')
-        powerline = Powerline(args, {}, theme)
+        powerline = Powerline(args, self.powerline.config, theme)
         segments = []
         for seg_name in segment_names:
             seg_mod = importer.import_(
@@ -35,8 +35,7 @@ class Segment(BasicSegment):
             segments.append(segment)
         for segment in segments:
             segment.add_to_powerline()
-        output = '>'.join([s[0] for s in powerline.segments])
-        print(output, powerline.segments)
+        output = ' '.join([s[0] for s in powerline.segments])
         return output
 
     def build_title(self, title):
