@@ -1,6 +1,8 @@
 import os
 import socket
-from ..utils import BasicSegment, warn
+from ..utils import BasicSegment
+from powerline_shell import Powerline, CustomImporter
+import argparse
 
 
 class Segment(BasicSegment):
@@ -12,13 +14,36 @@ class Segment(BasicSegment):
         default = '\033]0;%s\007'
         return wrappers.get(shell, default) % content
 
+    def build_title_segments(self, segment_names):
+        arg_parser = argparse.ArgumentParser()
+        arg_parser.add_argument('--shell', action='store', default='bash',
+                                choices=['bash', 'tcsh', 'zsh', 'bare'])
+        arg_parser.add_argument('prev_error', nargs='?', type=int, default=0,
+                                help='Error code returned by the last command')
+        args = arg_parser.parse_args()
+
+        importer = CustomImporter()
+        theme_mod = importer.import_(
+            'powerline_shell.themes.', 'default', 'Theme')
+        theme = getattr(theme_mod, 'Color')
+        powerline = Powerline(args, {}, theme)
+        segments = []
+        for seg_name in segment_names:
+            seg_mod = importer.import_(
+                'powerline_shell.segments.', seg_name, 'Segment')
+            segment = getattr(seg_mod, 'Segment')(powerline)
+            segments.append(segment)
+        for segment in segments:
+            segment.add_to_powerline()
+        output = '>'.join([s[0] for s in powerline.segments])
+        print(output, powerline.segments)
+        return output
+
     def build_title(self, title):
         if type(title) in (str, unicode):
             return title
         elif type(title) is list:
-            err = 'not implemented yet'
-            warn(err)
-            return err
+            return self.build_title_segments(title)
         else:
             return 'powerline-shell set_term_title title invalid'
 
